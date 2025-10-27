@@ -2,25 +2,28 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Uge44ProjektOpgaveNewsletter.Models;
+using Uge44ProjektOpgaveNewsletter.Service;
 
 namespace Uge44ProjektOpgaveNewsletter
 {
     public partial class MainWindow : Window
     {
-        private TcpClient _client;
-        private NetworkStream _stream;
-        private StreamReader _reader;
-        private StreamWriter _writer;
-        private string _responseData;
+        // Change these fields to nullable by adding '?'
+        private TcpClient? _client;
+        private NetworkStream? _stream;
+        private StreamReader? _reader;
+        private StreamWriter? _writer;
+        private string? _responseData;
+        private string userFilePath = "SavedUsers.txt"; // same file path you used earlier
+
+        // Add this property to reference your savedUsers model
+        private SaveUserService savedUsers = new SaveUserService();
+
+
 
         public MainWindow()
         {
@@ -36,13 +39,13 @@ namespace Uge44ProjektOpgaveNewsletter
                 MessageBox.Show("Invalid port number.");
                 return;
             }
-           
+
             responseTextbox.Text = "Connecting to server...\n";
 
             try
             {
                 // Connect in a background thread
-                await Task.Run(async () =>
+                await Task.Run(() =>
                 {
                     _client = new TcpClient();
                     _client.ReceiveTimeout = 3000;
@@ -52,8 +55,9 @@ namespace Uge44ProjektOpgaveNewsletter
                     _stream = _client.GetStream();
                     _reader = new StreamReader(_stream, Encoding.ASCII);
                     _writer = new StreamWriter(_stream, Encoding.ASCII) { NewLine = "\r\n", AutoFlush = true };
-                    _responseData = await _reader.ReadLineAsync();
-                    MessageBox.Show("Server response: " + _responseData);
+                    _responseData = _reader.ReadLine();
+                    // UI updates must be done on the UI thread
+                    Dispatcher.Invoke(() => MessageBox.Show("Server response: " + _responseData));
                 });
 
                 responseTextbox.Text += $"Connected to {host}:{port}\n";
@@ -94,17 +98,18 @@ namespace Uge44ProjektOpgaveNewsletter
                     responseTextbox.Text += "Username not accepted by server.\n";
                     return;
                 }
-                else 
+                else
                 {
                     string pass = await Task.Run(() => SendLogin(Pass));
                     responseTextbox.Text += "Server response:\n" + _responseData + "\n";
                 }
-                    
+
             }
             catch (Exception ex)
             {
                 responseTextbox.Text += "Error sending login: " + ex.Message + "\n";
             }
+
         }
 
         private string SendLogin(string message)
@@ -113,12 +118,46 @@ namespace Uge44ProjektOpgaveNewsletter
                 throw new InvalidOperationException("Not connected to server.");
 
             _writer.WriteLine(message);
-           
+
             return _responseData = _reader.ReadLine();
-           
-            
         }
 
-        
+        private void saveLoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            string username = userNameTextbox.Text.Trim();
+            string password = passwordBox.Password.Trim();
+
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                MessageBox.Show("Enter both username and password to save.");
+                return;
+            }
+
+            savedUsers.SaveUser(username, password, userFilePath);
+
+            MessageBox.Show("Login saved successfully.");
+
+            // Refresh ComboBox after saving
+            savedUsers.LoadUsers(userFilePath);
+            savedUserCB.ItemsSource = savedUsers.GetUsernames();
+            savedUserCB.SelectedItem = username;
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (savedUserCB.SelectedItem is string selectedUsername)
+            {
+                userNameTextbox.Text = selectedUsername;
+                passwordBox.Password = savedUsers.GetPassword(selectedUsername);
+            }
+        }
+
+        // Ensure ComboBox is initialized with usernames on window load
+        protected override void OnContentRendered(EventArgs e)
+        {
+            base.OnContentRendered(e);
+            savedUsers.LoadUsers(userFilePath);
+            savedUserCB.ItemsSource = savedUsers.GetUsernames();
+        }
     }
 }

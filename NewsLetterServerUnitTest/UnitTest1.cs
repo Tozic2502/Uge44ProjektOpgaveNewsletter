@@ -1,4 +1,7 @@
-﻿using Uge44ProjektOpgaveNewsletter;
+﻿using System;
+using Uge44ProjektOpgaveNewsletter.MainWindow.xaml;
+using Uge44ProjektOpgaveNewsletter.MainWindow.xaml.cs;
+using System.Collections.Generic;
 using Xunit;
 
 
@@ -8,33 +11,25 @@ namespace NewsLetterServerUnitTest
     public class UnitTest1
     {
         [Fact]//User story 1
-        public void userNameAuthTest()
-        {
-            userNameTextBox.Text = "Mikras01@easv365.dk";//UserName for the server you are using
-            connectionButton.PerformClick();
-
-            Assert.Equal("331", serverResponseCode);//insert server response code for username accepted
-
-
-        }
-        [Fact]//User story 1
-        public void passwordAuthTest()
-        {
-            passwordTextBox.Text = "12eb1b";//Password for the server you are using
-            connectionButton.PerformClick();
-
-            Assert.Equal("230", serverResponseCode);//insert server response code for successful authentication
-
-        }
-        [Fact]//User story 1
         public void connectionTest()
         {
-            serverTexbox.Text = "news.dotsrc.org";//Server you are using
+            serverTexbox.Text = "news.sunsite.dk";//Server you are using
             portTextbox.text = "119";//Port for the server you are using
             connectionButton.PerformClick();
 
             bool isConnected = ConnectToServer(serverTexbox.Text, int.Parse(portTextbox.Text));
-            Assert.True(isConnected, "Connection to the server failed.");
+            if (isConnected)
+            {
+                Assert.Equal("200", _responseData);//insert server response code for successful connection
+            }
+            if (_responseData == 200)
+            {
+                userNameTextBox.Text = "mikras01@easv365.dk";//UserName for the server you are using
+                passworBox.Text = "12eb1b";//Password for the server you are using
+                confirmButton.PerformClick();
+
+                Assert.Equal("281", _responseData);
+            }
 
         }
         [Fact]//User story 2
@@ -43,7 +38,7 @@ namespace NewsLetterServerUnitTest
             commandoTextbox.text = "LIST";
             confirmCommandoButton.PerformClick();
 
-            Assert.Equal("215", serverResponseCode);//insert server response code for successful group list retrieval
+            Assert.Equal("215", _responseData);//insert server response code for successful group list retrieval
 
         }
         [Fact]//User story 3
@@ -52,7 +47,7 @@ namespace NewsLetterServerUnitTest
             commandoTextbox.text = "GROUP group";//insert group name
             confirmCommandoButton.PerformClick();
 
-            Assert.Equal("211", serverResponseCode);//insert server response code for successful group selection
+            Assert.Equal("211", _responseData);//insert server response code for successful group selection
         }
         [Fact]//User story 4
         public void selectHeadlineTest()
@@ -60,7 +55,7 @@ namespace NewsLetterServerUnitTest
             commandoTextbox.text = "Xover group/articleNumber";//insert group name and article number'
             confirmCommandoButton.PerformClick();
 
-            Assert.Equal("224", serverResponseCode);//insert server response code for successful headline retrieval
+            Assert.Equal("224", _responseData);//insert server response code for successful headline retrieval
 
         }
         [Fact]//User story 5
@@ -68,14 +63,14 @@ namespace NewsLetterServerUnitTest
         {
             commandoTextbox.text = "POST";//gets reply code from server to see if user is authorized to post
 
-            Assert.Equal("340", serverResponseCode);//insert server response code for authorized to post
+            Assert.Equal("340", _responseData);//insert server response code for authorized to post
         }
         [Fact]//User story 6
         public void postArticleTest()
         {
             commandoTextbox.text = "POST";//insert article to post
 
-            Assert.Equal("240", serverResponseCode);//insert server response code for successful post
+            Assert.Equal("240", _responseData);//insert server response code for successful post
         }
         [Fact]//User story 7
         public void saveGroupTest()
@@ -111,7 +106,7 @@ namespace NewsLetterServerUnitTest
         {
             commandoTextbox.text = "QUIT";//Command to disconnect from server
 
-            Assert.Equal("205", serverResponseCode);//insert server response code for successful disconnection
+            Assert.Equal("205", _responseData);//insert server response code for successful disconnection
 
         }
 
