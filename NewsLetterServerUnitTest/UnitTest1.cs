@@ -22,7 +22,7 @@ namespace NewsLetterServerUnitTest
             {
                 Assert.Equal("200", _responseData);//insert server response code for successful connection
             }
-            if (_responseData == 200)
+            if (_responseData == "200")
             {
                 userNameTextBox.Text = "mikras01@easv365.dk";//UserName for the server you are using
                 passworBox.Text = "12eb1b";//Password for the server you are using
