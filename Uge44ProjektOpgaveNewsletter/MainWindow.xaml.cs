@@ -56,8 +56,8 @@ namespace Uge44ProjektOpgaveNewsletter
                     _reader = new StreamReader(_stream, Encoding.ASCII);
                     _writer = new StreamWriter(_stream, Encoding.ASCII) { NewLine = "\r\n", AutoFlush = true };
                     _responseData = _reader.ReadLine();
-                    // UI updates must be done on the UI thread
-                    Dispatcher.Invoke(() => MessageBox.Show("Server response: " + _responseData));
+                    
+                    responseTextbox.Text += "Server response:\n" + _responseData + "\n";
                 });
 
                 responseTextbox.Text += $"Connected to {host}:{port}\n";
