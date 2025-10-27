@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uge44ProjektOpgaveNewsletter", "Uge44ProjektOpgaveNewsletter\Uge44ProjektOpgaveNewsletter.csproj", "{83197F4B-56F4-42DC-87E5-D71B41BEFBDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewsLetterServerUnitTest", "NewsLetterServerUnitTest\NewsLetterServerUnitTest.csproj", "{83701C09-3BBD-441D-9619-A395748109AF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{83197F4B-56F4-42DC-87E5-D71B41BEFBDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83197F4B-56F4-42DC-87E5-D71B41BEFBDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83197F4B-56F4-42DC-87E5-D71B41BEFBDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83197F4B-56F4-42DC-87E5-D71B41BEFBDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83701C09-3BBD-441D-9619-A395748109AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83701C09-3BBD-441D-9619-A395748109AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83701C09-3BBD-441D-9619-A395748109AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83701C09-3BBD-441D-9619-A395748109AF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1F9D471C-C12F-4369-ABC9-ED745968F4EC}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,23 @@
+﻿<Window x:Class="Uge44ProjektOpgaveNewsletter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Uge44ProjektOpgaveNewsletter"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <TextBox x:Name="serverNameTextbox" HorizontalAlignment="Left" Margin="280,98,0,0" TextWrapping="Wrap" Text="news.sunsite.dk" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="portTextbox" HorizontalAlignment="Left" Margin="405,98,0,0" TextWrapping="Wrap" Text="119" VerticalAlignment="Top" Width="120"/>
+        <Label Content="ServerName" HorizontalAlignment="Left" Margin="280,72,0,0" VerticalAlignment="Top"/>
+        <Label Content="Port" HorizontalAlignment="Left" Margin="405,72,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="userNameTextbox" HorizontalAlignment="Left" Margin="280,271,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
+        <Label Content="UserName" HorizontalAlignment="Left" Margin="280,245,0,0" VerticalAlignment="Top"/>
+        <Label Content="Password" HorizontalAlignment="Left" Margin="405,245,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="confirmButton" Content="Confirm" HorizontalAlignment="Center" Margin="0,340,0,0" VerticalAlignment="Top" Width="130" Click="ConfirmButton_Click"/>
+        <Button x:Name="ConnectionButton" Content="ConnectionButton" HorizontalAlignment="Center" Margin="0,197,0,0" VerticalAlignment="Top" Width="130" Click="ConnectionButton_Click"/>
+        <TextBox x:Name="responseTextbox" HorizontalAlignment="Left" Margin="626,152,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="137" Height="87"/>
+        <PasswordBox x:Name="passwordBox" HorizontalAlignment="Left" Margin="405,271,0,0" VerticalAlignment="Top" Width="120"/>
+
+    </Grid>
+</Window>

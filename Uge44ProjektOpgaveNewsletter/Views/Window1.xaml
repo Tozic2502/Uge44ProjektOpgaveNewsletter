@@ -1,0 +1,30 @@
+﻿<Window x:Class="Uge44ProjektOpgaveNewsletter.Views.Window1"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Uge44ProjektOpgaveNewsletter.Views"
+        mc:Ignorable="d"
+        Title="Window1" Height="450" Width="800">
+    <Grid>
+        <ListView x:Name="savedGroupsLV" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,36,642,0" SelectionChanged="savedGroupsLV_SelectionChanged">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Label x:Name="serverNameLable" Content="ServerName" HorizontalAlignment="Left" VerticalAlignment="Top" Height="31" Width="135"/>
+        <TextBlock x:Name="InfoTextBlock" HorizontalAlignment="Left" Margin="158,36,0,0" TextWrapping="Wrap" Text="Text Here from Server" VerticalAlignment="Top" Height="388" Width="490"/>
+        <ListView x:Name="lastUsedCommandLV" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="653,36,0,0" SelectionChanged="lastUsedCommandLV_SelectionChanged">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <TextBox HorizontalAlignment="Left" Margin="158,0,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="490" Height="34"/>
+        <Button x:Name="confirmCommandoButton" Content="Confirm" HorizontalAlignment="Left" Margin="653,0,0,0" VerticalAlignment="Top" Height="34" Width="147" Click="confirmCommandoButton_Click"/>
+
+    </Grid>
+</Window>
