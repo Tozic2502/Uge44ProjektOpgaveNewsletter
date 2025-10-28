@@ -29,7 +29,7 @@ namespace Uge44ProjektOpgaveNewsletter
         {
             InitializeComponent();
         }
-
+        // Handle Connection button click to connect to server
         private async void ConnectionButton_Click(object sender, RoutedEventArgs e)
         {
             string host = serverNameTextbox.Text.Trim();
@@ -67,7 +67,7 @@ namespace Uge44ProjektOpgaveNewsletter
                 responseTextbox.Text += $"Error connecting: {ex.Message}\n";
             }
         }
-
+        // Handle Confirm button click to send login info
         private async void ConfirmButton_Click(object sender, RoutedEventArgs e)
         {
             if (_client == null || !_client.Connected)
@@ -109,9 +109,17 @@ namespace Uge44ProjektOpgaveNewsletter
             {
                 responseTextbox.Text += "Error sending login: " + ex.Message + "\n";
             }
-
+           if (_responseData.StartsWith("281"))
+            {
+                responseTextbox.Text += "Login successful!\n";
+                PassVariable();
+            }
+            else
+            {
+                responseTextbox.Text += "Login failed. Check your credentials.\n";
+            }
         }
-
+        // Method to send login information to the server
         private string SendLogin(string message)
         {
             if (_writer == null || _reader == null)
@@ -121,7 +129,7 @@ namespace Uge44ProjektOpgaveNewsletter
 
             return _responseData = _reader.ReadLine();
         }
-
+        // Save login credentials to file
         private void saveLoginButton_Click(object sender, RoutedEventArgs e)
         {
             string username = userNameTextbox.Text.Trim();
@@ -142,7 +150,7 @@ namespace Uge44ProjektOpgaveNewsletter
             savedUserCB.ItemsSource = savedUsers.GetUsernames();
             savedUserCB.SelectedItem = username;
         }
-
+        // Handle selection change in ComboBox to populate username and password
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (savedUserCB.SelectedItem is string selectedUsername)
@@ -159,5 +167,17 @@ namespace Uge44ProjektOpgaveNewsletter
             savedUsers.LoadUsers(userFilePath);
             savedUserCB.ItemsSource = savedUsers.GetUsernames();
         }
+        //passes connection reader and writer to next window
+        private void PassVariable()
+        {
+            var window1 = new Views.Window1();
+            window1.SetConnection(_reader, _writer, _client, _responseData);
+            window1.Show();
+            this.Close();
+
+        }
+
+
+
     }
 }
