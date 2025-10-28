@@ -22,6 +22,7 @@ namespace Uge44ProjektOpgaveNewsletter
 
         // Add this property to reference your savedUsers model
         private SaveUserService savedUsers = new SaveUserService();
+        
 
 
 
@@ -57,9 +58,9 @@ namespace Uge44ProjektOpgaveNewsletter
                     _writer = new StreamWriter(_stream, Encoding.ASCII) { NewLine = "\r\n", AutoFlush = true };
                     _responseData = _reader.ReadLine();
                     
-                    responseTextbox.Text += "Server response:\n" + _responseData + "\n";
+                    
                 });
-
+                responseTextbox.Text += "Server response:\n" + _responseData + "\n";
                 responseTextbox.Text += $"Connected to {host}:{port}\n";
             }
             catch (Exception ex)
@@ -134,6 +135,8 @@ namespace Uge44ProjektOpgaveNewsletter
         {
             string username = userNameTextbox.Text.Trim();
             string password = passwordBox.Password.Trim();
+            string serverName = serverNameTextbox.Text.Trim();
+            string port = portTextbox.Text.Trim();
 
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
@@ -141,7 +144,7 @@ namespace Uge44ProjektOpgaveNewsletter
                 return;
             }
 
-            savedUsers.SaveUser(username, password, userFilePath);
+            savedUsers.SaveUser(username, password,serverName,port, userFilePath);
 
             MessageBox.Show("Login saved successfully.");
 
@@ -157,6 +160,8 @@ namespace Uge44ProjektOpgaveNewsletter
             {
                 userNameTextbox.Text = selectedUsername;
                 passwordBox.Password = savedUsers.GetPassword(selectedUsername);
+                serverNameTextbox.Text = savedUsers.GetServerName(selectedUsername);
+                portTextbox.Text = savedUsers.GetPort(selectedUsername).ToString();
             }
         }
 
@@ -171,13 +176,12 @@ namespace Uge44ProjektOpgaveNewsletter
         private void PassVariable()
         {
             var window1 = new Views.Window1();
-            window1.SetConnection(_reader, _writer, _client, _responseData);
+            window1.SetConnection(_reader, _writer, _client, _responseData, serverNameTextbox.Text);
             window1.Show();
             this.Close();
 
         }
 
-
-
+        
     }
 }

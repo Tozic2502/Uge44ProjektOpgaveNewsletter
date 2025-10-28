@@ -4,7 +4,14 @@ using System.IO;
 
 public class SaveUserService
 {
-    private Dictionary<string, string> users = new Dictionary<string, string>();
+    private class UserInfo
+    {
+        public string Password { get; set; } = "";
+        public string ServerName { get; set; } = "";
+        public string Port { get; set; } = "";
+    }
+
+    private Dictionary<string, UserInfo> users = new Dictionary<string, UserInfo>();
 
     public void LoadUsers(string filePath)
     {
@@ -14,13 +21,24 @@ public class SaveUserService
 
         foreach (var line in File.ReadAllLines(filePath))
         {
+            // Format: username:password:servername:port
             var parts = line.Split(':');
-            if (parts.Length == 2)
+            if (parts.Length >= 2)
             {
                 var username = parts[0].Trim();
                 var password = parts[1].Trim();
+                var serverName = parts.Length >= 3 ? parts[2].Trim() : "";
+                var port = parts.Length >= 4 ? parts[3].Trim() : "";
+
                 if (!users.ContainsKey(username))
-                    users.Add(username, password);
+                {
+                    users.Add(username, new UserInfo
+                    {
+                        Password = password,
+                        ServerName = serverName,
+                        Port = port
+                    });
+                }
             }
         }
     }
@@ -32,9 +50,20 @@ public class SaveUserService
 
     public string GetPassword(string username)
     {
-        return users.ContainsKey(username) ? users[username] : string.Empty;
+        return users.ContainsKey(username) ? users[username].Password : string.Empty;
     }
-    public void SaveUser(string username, string password, string filePath)
+
+    public string GetServerName(string username)
+    {
+        return users.ContainsKey(username) ? users[username].ServerName : string.Empty;
+    }
+
+    public string GetPort(string username)
+    {
+        return users.ContainsKey(username) ? users[username].Port : string.Empty;
+    }
+
+    public void SaveUser(string username, string password, string serverName, string port, string filePath)
     {
         // Ensure the directory exists
         var directory = Path.GetDirectoryName(filePath);
@@ -46,15 +75,20 @@ public class SaveUserService
         // Reload existing users first
         LoadUsers(filePath);
 
-        // If user already exists, update password
-        users[username] = password;
+        // Add or update user info
+        users[username] = new UserInfo
+        {
+            Password = password,
+            ServerName = serverName,
+            Port = port
+        };
 
         // Rewrite file with all users
         using (StreamWriter writer = new StreamWriter(filePath, false))
         {
             foreach (var kvp in users)
             {
-                writer.WriteLine($"{kvp.Key}:{kvp.Value}");
+                writer.WriteLine($"{kvp.Key}:{kvp.Value.Password}:{kvp.Value.ServerName}:{kvp.Value.Port}");
             }
         }
     }

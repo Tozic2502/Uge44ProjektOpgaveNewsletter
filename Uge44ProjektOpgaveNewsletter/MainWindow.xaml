@@ -19,7 +19,7 @@
         <TextBox x:Name="responseTextbox" HorizontalAlignment="Left" Margin="601,0,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Center" Width="189" Height="414"/>
         <PasswordBox x:Name="passwordBox" HorizontalAlignment="Left" Margin="405,271,0,0" VerticalAlignment="Top" Width="191"/>
         <Button x:Name="saveLoginButton" Content="Save Login" HorizontalAlignment="Left" Margin="154,271,0,0" VerticalAlignment="Top" Height="18" Width="64" Click="saveLoginButton_Click"/>
-        <ComboBox x:Name="savedUserCB" HorizontalAlignment="Left" Margin="10,271,0,0" VerticalAlignment="Top" Width="109" Height="18" SelectionChanged="ComboBox_SelectionChanged"/>
+        <ComboBox x:Name="savedUserCB" HorizontalAlignment="Left" Margin="10,271,0,0" VerticalAlignment="Top" Width="139" Height="18" SelectionChanged="ComboBox_SelectionChanged"/>
 
     </Grid>
 </Window>

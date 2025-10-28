@@ -5,26 +5,91 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Uge44ProjektOpgaveNewsletter.Views"
         mc:Ignorable="d"
-        Title="Window1" Height="450" Width="800">
-    <Grid>
-        <ListView x:Name="savedGroupsLV" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,36,642,0" SelectionChanged="savedGroupsLV_SelectionChanged">
+        Title="Window1" Height="450" Width="1200" MinWidth="800" MinHeight="400">
+
+    <Grid Margin="10">
+        <!-- Define columns: 
+             1. Left = saved groups
+             2. Middle = info/log area
+             3. Right = last used commands -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Define rows:
+             1. Header area (server + buttons)
+             2. Main content area (lists + text)
+             3. Command input -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- SERVER LABEL + BUTTONS -->
+        <StackPanel Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,0,0,5">
+            <Label x:Name="serverNameLable" Content="ServerName" VerticalAlignment="Center" />
+            <Button x:Name="SaveGroupButton" Content="Save Group" Width="100" Margin="10,0,0,0"
+                    Click="SaveGroupButton_Click"/>
+        </StackPanel>
+
+        <!-- LEFT: Saved Groups -->
+        <ListView x:Name="savedGroupsLV"
+                  Grid.Row="1" Grid.Column="0"
+                  Margin="0,0,5,0"
+                  SelectionChanged="savedGroupsLV_SelectionChanged">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn/>
+                    <GridViewColumn Header="Saved Groups"/>
                 </GridView>
             </ListView.View>
         </ListView>
-        <Label x:Name="serverNameLable" Content="ServerName" HorizontalAlignment="Left" VerticalAlignment="Top" Height="31" Width="135"/>
-        <TextBlock x:Name="InfoTextBlock" HorizontalAlignment="Left" Margin="158,36,0,0" TextWrapping="Wrap" Text="Text Here from Server" VerticalAlignment="Top" Height="388" Width="490"/>
-        <ListView x:Name="lastUsedCommandLV" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="653,36,0,0" SelectionChanged="lastUsedCommandLV_SelectionChanged">
+
+        <!-- CENTER: Scrollable Info Text -->
+        <TextBox x:Name="InfoTextBlock"
+         Grid.Row="1" Grid.Column="1"
+         TextWrapping="Wrap"
+         VerticalScrollBarVisibility="Auto"
+         HorizontalScrollBarVisibility="Disabled"
+         IsReadOnly="True"
+         AcceptsReturn="True"
+         FontSize="14"
+         Padding="5"
+         Margin="5,0,5,0"
+         Text="Text Here from Server"/>
+
+
+        <!-- RIGHT: Last Used Commands -->
+        <ListView x:Name="lastUsedCommandLV"
+                  Grid.Row="1" Grid.Column="2"
+                  Margin="5,0,0,0"
+                  SelectionChanged="lastUsedCommandLV_SelectionChanged">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn/>
+                    <GridViewColumn Header="Last Commands"/>
                 </GridView>
             </ListView.View>
         </ListView>
-        <TextBox HorizontalAlignment="Left" Margin="158,0,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="490" Height="34"/>
-        <Button x:Name="confirmCommandoButton" Content="Confirm" HorizontalAlignment="Left" Margin="653,0,0,0" VerticalAlignment="Top" Height="34" Width="147" Click="confirmCommandoButton_Click"/>
+
+        <!-- BOTTOM: Command input -->
+        <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,5,0,0">
+            <TextBox x:Name="commandotTextbox"
+                     TextWrapping="Wrap"
+                     Text="Commando box"
+                     VerticalAlignment="Center"
+                     Margin="0,0,5,0"
+                     Width="Auto"
+                     HorizontalAlignment="Stretch"
+                     MinWidth="400"
+                     Height="34"
+                     />
+            <Button x:Name="confirmCommandoButton"
+                    Content="Confirm"
+                    Width="120"
+                    Click="confirmCommandoButton_Click"/>
+        </StackPanel>
 
     </Grid>
 </Window>
