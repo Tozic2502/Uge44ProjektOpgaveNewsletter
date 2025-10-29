@@ -21,7 +21,7 @@ namespace Uge44ProjektOpgaveNewsletter.Views
     /// <summary>
     /// Interaction logic for Window1.xaml
     /// </summary>
-    public partial class Window1 : Window
+    public partial class CommandWindow : Window
     {
         private StreamReader? _reader;
         private StreamWriter? _writer;
@@ -29,7 +29,7 @@ namespace Uge44ProjektOpgaveNewsletter.Views
         private string? _responseData;
         private string? _currentGroup;
 
-        public Window1()
+        public CommandWindow()
         {
             InitializeComponent();
             lastUsedCommandLV.Items.Clear();
@@ -112,7 +112,7 @@ namespace Uge44ProjektOpgaveNewsletter.Views
                         return $"Server rejected POST: {response}";
 
                     // Open popup window for subject + body
-                    var postWindow = new Window2();
+                    var postWindow = new PostWindow();
                     postWindow.Owner = this;
                     bool? result = postWindow.ShowDialog();
 

@@ -175,9 +175,9 @@ namespace Uge44ProjektOpgaveNewsletter
         //passes connection reader and writer to next window
         private void PassVariable()
         {
-            var window1 = new Views.Window1();
-            window1.SetConnection(_reader, _writer, _client, _responseData, serverNameTextbox.Text);
-            window1.Show();
+            var commandWindow = new Views.CommandWindow();
+            commandWindow.SetConnection(_reader, _writer, _client, _responseData, serverNameTextbox.Text);
+            commandWindow.Show();
             this.Close();
 
         }

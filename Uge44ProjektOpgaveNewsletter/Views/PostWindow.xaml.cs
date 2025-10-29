@@ -17,12 +17,12 @@ namespace Uge44ProjektOpgaveNewsletter.Views
     /// <summary>
     /// Interaction logic for Window2.xaml
     /// </summary>
-    public partial class Window2 : Window
+    public partial class PostWindow : Window
     {
         public string PostSubject { get; private set; } = "";
         public string PostBody { get; private set; } = "";
 
-        public Window2()
+        public PostWindow()
         {
             InitializeComponent();
         }
