@@ -15,6 +15,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Uge44ProjektOpgaveNewsletter.Models;
+using Uge44ProjektOpgaveNewsletter.Service;
 
 namespace Uge44ProjektOpgaveNewsletter.Views
 {
@@ -33,7 +35,7 @@ namespace Uge44ProjektOpgaveNewsletter.Views
         {
             InitializeComponent();
             lastUsedCommandLV.Items.Clear();
-            foreach (CommandType command in Enum.GetValues(typeof(CommandType)))
+            foreach (CommandWindowCommandTypes command in Enum.GetValues(typeof(CommandWindowCommandTypes)))
             {
                 lastUsedCommandLV.Items.Add(command);
             }
@@ -54,14 +56,11 @@ namespace Uge44ProjektOpgaveNewsletter.Views
         private void lastUsedCommandLV_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             
-            if(lastUsedCommandLV.SelectedItem != null)
+            if(lastUsedCommandLV.SelectedItem is not null) 
             {
                 commandotTextbox.Text = lastUsedCommandLV.SelectedItem.ToString();
             }
-            
-            
-                
-
+                                    
         }
         // Confirm command button click event and sets the InfoTextBlock text to the reader's content
         private async void confirmCommandoButton_Click(object sender, RoutedEventArgs e)
@@ -85,9 +84,6 @@ namespace Uge44ProjektOpgaveNewsletter.Views
 
             }
         }
-        // Method to send commands to the server and read the response
-
-
         private string sendCommandos(string commando)
         {
             if (_writer == null || _reader == null)
@@ -167,7 +163,7 @@ namespace Uge44ProjektOpgaveNewsletter.Views
                         _currentGroup = parts[3]; // correct index
 
                     // Use formatting method
-                    return FormatGroupResponse(responseData.ToString().Trim());
+                    return responseData.ToString().Trim().FormatGroupResponse();
                 }
 
                 // For multi-line responses (LIST, XOVER, etc.)
@@ -190,12 +186,12 @@ namespace Uge44ProjektOpgaveNewsletter.Views
                 // Apply formatting based on command
                 if (commando.StartsWith("ARTICLE", StringComparison.OrdinalIgnoreCase))
                 {
-                    return FormatArticleResponse(rawResponse);
+                    return rawResponse.FormatXoverResponse();
                 }
 
                 if (commando.StartsWith("XOVER", StringComparison.OrdinalIgnoreCase))
                 {
-                    return FormatXoverResponse(rawResponse);
+                    return rawResponse.FormatXoverResponse();
                 }
 
                 // For LIST or other commands, just return raw
@@ -213,10 +209,6 @@ namespace Uge44ProjektOpgaveNewsletter.Views
                 return _responseData;
             }
         }
-
-
-
-
         // Save group button click event to save the group command to the saved groups listview
         private void SaveGroupButton_Click(object sender, RoutedEventArgs e)
         {
@@ -251,97 +243,9 @@ namespace Uge44ProjektOpgaveNewsletter.Views
 
             }
         }
-        private string FormatGroupResponse(string response)
-        {
-            if (string.IsNullOrWhiteSpace(response))
-                return "No response received.";
-
-            var parts = response.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length < 5 || parts[0] != "211")
-                return response; // Not a standard GROUP response
-
-            string articleCount = parts[1];
-            string firstArticle = parts[2];
-            string lastArticle = parts[3];
-            string groupName = parts[4];
-
-            return $"Group Selected: {groupName}\n" +
-                   $"Articles Available: {articleCount}\n" +
-                   $"First Article #: {firstArticle}\n" +
-                   $"Last Article #: {lastArticle}";
-        }
-        private string FormatArticleResponse(string response)
-        {
-            var lines = response.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-            if (lines.Length == 0)
-                return "No article data.";
-
-            StringBuilder sb = new StringBuilder();
-
-            // Skip the first status line (e.g., "220 ...")
-            sb.AppendLine("=== ARTICLE HEADER ===");
-
-            int i = 1;
-            for (; i < lines.Length; i++)
-            {
-                if (string.IsNullOrWhiteSpace(lines[i]))
-                    break; // blank line separates headers and body
-                sb.AppendLine(lines[i].Trim());
-            }
-
-            sb.AppendLine("\n=== ARTICLE BODY ===");
-
-            for (i++; i < lines.Length; i++)
-                sb.AppendLine(lines[i].Trim());
-
-            return sb.ToString();
-        }
-        private string FormatXoverResponse(string response)
-        {
-            var lines = response.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-            if (lines.Length <= 1)
-                return "No overview data.";
-
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("=== ARTICLE OVERVIEW ===");
-
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string line = lines[i];
-                if (line.StartsWith("224")) continue; // skip status line
-                if (line.Trim() == ".") break;
-
-                var parts = line.Split('\t');
-                if (parts.Length >= 4)
-                {
-                    sb.AppendLine($"Article #{parts[0]}");
-                    sb.AppendLine($"Subject: {parts[1]}");
-                    sb.AppendLine($"From: {parts[2]}");
-                    sb.AppendLine($"Date: {parts[3]}");
-                    sb.AppendLine("------------------------------");
-                }
-                else
-                {
-                    sb.AppendLine(line); // fallback for malformed lines
-                }
-            }
-
-            return sb.ToString();
-        }
+        
+       
 
 
     }
-}
-// Enum to represent different command types for an initiel listview commandes
-public enum CommandType
-{
-    LIST,
-    GROUP,
-    XOVER,
-    ARTICLE,
-    HEAD,
-    POST,
-    QUIT
-
-
 }
