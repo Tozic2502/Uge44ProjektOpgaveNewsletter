@@ -95,6 +95,9 @@ namespace Uge44ProjektOpgaveNewsletter.Views
 
             try
             {
+                _client.ReceiveTimeout = 15000; // 15s timeout
+                _client.SendTimeout = 15000;
+
                 // --- Special handling for POST ---
                 if (commando.Equals("POST", StringComparison.OrdinalIgnoreCase))
                 {
@@ -119,17 +122,23 @@ namespace Uge44ProjektOpgaveNewsletter.Views
                     string subject = postWindow.PostSubject;
                     string body = postWindow.PostBody;
 
-                    // Build the full NNTP article
-                    StringBuilder article = new StringBuilder();
-                    article.AppendLine("From: user@example.com"); // or your user info
-                    article.AppendLine($"Newsgroups: {_currentGroup}");
-                    article.AppendLine($"Subject: {subject}");
-                    article.AppendLine($"Date: {DateTime.UtcNow:R}");
-                    article.AppendLine();
-                    article.AppendLine(body);
-                    article.AppendLine(".");
+                    // Build article line by line
+                    List<string> articleLines = new List<string>
+                        {
+                            "From: user@example.com",
+                            $"Newsgroups: {_currentGroup}",
+                            $"Subject: {subject}",
+                            $"Date: {DateTime.UtcNow:R}",
+                            ""
+                        };
+                    articleLines.AddRange(body.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None));
 
-                    _writer.WriteLine(article.ToString());
+                    foreach (var articleLine in articleLines)
+                    {
+                        _writer.WriteLine(articleLine);
+                    }
+                    // End of article
+                    _writer.WriteLine(".");
                     _writer.Flush();
 
                     string? finalResponse = _reader.ReadLine();
@@ -140,61 +149,56 @@ namespace Uge44ProjektOpgaveNewsletter.Views
                 _writer.WriteLine(commando);
                 _writer.Flush();
 
-                _client.ReceiveTimeout = 5000;
-                _client.SendTimeout = 5000;
-
                 StringBuilder responseData = new StringBuilder();
                 string? line;
 
+                // For GROUP, read only **one line**
+                if (commando.StartsWith("GROUP", StringComparison.OrdinalIgnoreCase))
+                {
+                    line = _reader.ReadLine();
+                    if (line == null)
+                        return "No response from server for GROUP command.";
+
+                    responseData.AppendLine(line);
+
+                    // Parse current group
+                    var parts = line.Split(' ');
+                    if (parts.Length >= 4)
+                        _currentGroup = parts[3]; // correct index
+
+                    // Use formatting method
+                    return FormatGroupResponse(responseData.ToString().Trim());
+                }
+
+                // For multi-line responses (LIST, XOVER, etc.)
                 while ((line = _reader.ReadLine()) != null)
                 {
-                    // Detect server errors
                     if (line.StartsWith("4") || line.StartsWith("5"))
                     {
                         responseData.AppendLine($"Server error: {line}");
                         break;
                     }
 
-                    if (line == "." || string.IsNullOrWhiteSpace(line))
+                    if (line == ".")
                         break;
 
                     responseData.AppendLine(line);
-
-                    // --- Detect current group name ---
-                    if (commando.StartsWith("GROUP", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var parts = line.Split(' ');
-                        if (parts.Length >= 5)
-                            _currentGroup = parts[4];
-                    }
                 }
 
                 string rawResponse = responseData.ToString();
 
-                // --- Format responses for readability ---
+                // Apply formatting based on command
                 if (commando.StartsWith("ARTICLE", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Each header on its own line, then body separated clearly
-                    var formatted = rawResponse.Replace("\r", "")
-                                               .Replace("\n\n", "\n")
-                                               .Replace("\n.", "")
-                                               .Trim();
-
-                    return $"📄 ARTICLE:\n{formatted}";
+                    return FormatArticleResponse(rawResponse);
                 }
-                else if (commando.StartsWith("XOVER", StringComparison.OrdinalIgnoreCase))
+
+                if (commando.StartsWith("XOVER", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Split tab-separated overview lines into columns
-                    var formatted = new StringBuilder();
-                    foreach (var l in rawResponse.Split('\n'))
-                    {
-                        var parts = l.Split('\t');
-                        if (parts.Length >= 4)
-                            formatted.AppendLine($"📰 {parts[0]} | {parts[1]} | {parts[2]} | {parts[3]}");
-                    }
-                    return formatted.ToString();
+                    return FormatXoverResponse(rawResponse);
                 }
 
+                // For LIST or other commands, just return raw
                 _responseData = rawResponse;
                 return _responseData;
             }
@@ -209,6 +213,7 @@ namespace Uge44ProjektOpgaveNewsletter.Views
                 return _responseData;
             }
         }
+
 
 
 
