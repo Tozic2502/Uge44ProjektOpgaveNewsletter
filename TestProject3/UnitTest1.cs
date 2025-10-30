@@ -1,115 +1,106 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows.Controls;
-using Uge44ProjektOpgaveNewsletter;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Uge44ProjektOpgaveNewsletter.Service;
 using Xunit;
-
-
 
 namespace Tests
 {
     public class UnitTest1
     {
-        [Fact]//User story 1
-        public void connectionTest()
+        private readonly ConnectionService _connection = ConnectionService.Instance;
+
+        [Fact] // User story 1
+        public async Task ConnectionTest()
         {
-            MainWindow.serverTexbox.Text = "news.sunsite.dk";//Server you are using
-            MainWindow.portTextbox.text = "119";//Port for the server you are using
-            MainWindow.connectionButton.PerformClick();
-
-            bool isConnected = ConnectToServer(serverTexbox.Text, int.Parse(portTextbox.Text));
-            if (isConnected)
-            {
-                Assert.Equal("200", _responseData);//insert server response code for successful connection
-            }
-            if (_responseData == "200")
-            {
-                userNameTextBox.Text = "mikras01@easv365.dk";//UserName for the server you are using
-                passworBox.Text = "12eb1b";//Password for the server you are using
-                confirmButton.PerformClick();
-
-                Assert.Equal("281", _responseData);
-            }
-
+            string response = await _connection.ConnectAsync("news.sunsite.dk", 119);
+            Assert.StartsWith("200", response);
         }
-        [Fact]//User story 2
-        public void getListOfgroupsTest()
+
+        [Fact] // User story 2
+        public async Task GetListOfGroupsTest()
         {
-            commandoTextbox.text = "LIST";
-            confirmCommandoButton.PerformClick();
-
-            Assert.Equal("215", _responseData);//insert server response code for successful group list retrieval
-
+            string username = "mikras01@easv365.dk";
+            string password = "12eb1b";
+            await _connection.ConnectAsync("news.sunsite.dk", 119);
+            await _connection.SendCommandAsync($"AUTHINFO USER {username}");
+            await _connection.SendCommandAsync($"AUTHINFO PASS {password}");
+            string response = await _connection.SendCommandAsync("LIST");
+            Assert.StartsWith("215", response);
         }
-        [Fact]//User story 3
-        public void selectGroupTest()
-        {
-            commandoTextbox.text = "GROUP group";//insert group name
-            confirmCommandoButton.PerformClick();
 
-            Assert.Equal("211", _responseData);//insert server response code for successful group selection
+        [Fact] // User story 3
+        public async Task SelectGroupTest()
+        {
+            string username = "mikras01@easv365.dk";
+            string password = "12eb1b";
+            await _connection.ConnectAsync("news.sunsite.dk", 119);
+            await _connection.SendCommandAsync($"AUTHINFO USER {username}");
+            await _connection.SendCommandAsync($"AUTHINFO PASS {password}");
+
+            string response = await _connection.SendCommandAsync("GROUP dk.test");
+            Assert.StartsWith("211", response);
         }
-        [Fact]//User story 4
-        public void selectHeadlineTest()
+
+        [Fact] // User story 4
+        public async Task SelectArticleTest()
         {
-            commandoTextbox.text = "Xover group/articleNumber";//insert group name and article number'
-            confirmCommandoButton.PerformClick();
-
-            Assert.Equal("224", _responseData);//insert server response code for successful headline retrieval
-
+            string username = "mikras01@easv365.dk";
+            string password = "12eb1b";
+            await _connection.ConnectAsync("news.sunsite.dk", 119);
+            await _connection.SendCommandAsync($"AUTHINFO USER {username}");    
+            await _connection.SendCommandAsync($"AUTHINFO PASS {password}");
+            await _connection.SendCommandAsync("GROUP dk.test");
+            string response = await _connection.SendCommandAsync("XOVER 1-10");
+            Assert.StartsWith("224", response);
         }
-        [Fact]//User story 5
-        public void postAuthTest()
-        {
-            commandoTextbox.text = "POST";//gets reply code from server to see if user is authorized to post
 
-            Assert.Equal("340", _responseData);//insert server response code for authorized to post
-        }
-        [Fact]//User story 6
-        public void postArticleTest()
+        [Fact] // User story 5
+        public async Task PostAuthTest()
         {
-            commandoTextbox.text = "POST";//insert article to post
+            string username = "mikras01@easv365.dk";
+            string password = "12eb1b";
 
-            Assert.Equal("240", _responseData);//insert server response code for successful post
+            await _connection.ConnectAsync("news.sunsite.dk", 119);
+            await _connection.SendCommandAsync($"AUTHINFO USER {username}");
+            await _connection.SendCommandAsync($"AUTHINFO PASS {password}");
+            string response = await _connection.SendCommandAsync("POST");
+
+            Assert.StartsWith("340", response);
         }
-        [Fact]//User story 7
-        public void saveGroupTest()
+
+        [Fact] // User story 7
+        public void SaveGroupTest()
         {
-            // Arrange
             var service = new GroupService();
-            string commandTextboxInput = "Developers";
+            string userName = "Developers";
+            string groupName = "SomeGroup";
 
-            // Act
-            service.SaveGroup(commandTextboxInput);
-            List<string> savedGroups = service.GetGroups();
+            service.SaveGroup(userName, groupName);
+            List<string> savedGroups = service.LoadGroups(userName);
 
-            // Assert
-            Assert.Equal(1, savedGroups.Count, "Group list should contain one item.");
-            Assert.Equal("Developers", savedGroups[0], "Saved group name should match input.");
-
+            Assert.Contains(groupName, savedGroups);
         }
-        [Fact]//user story 8
-        public void loadSavedGroupTest()
+
+        [Fact] // User story 8
+        public void LoadSavedGroupTest()
         {
-            // Arrange
             var service = new GroupService();
-            service.SaveGroup("Developers");
-            // Act
-            List<string> loadedGroups = service.LoadGroups();
-            // Assert
-            Assert.Equal(1, loadedGroups.Count, "Loaded group list should contain one item.");
-            Assert.Equal("Developers", loadedGroups[0], "Loaded group name should match saved group.");
+            string userName = "Developers";
+            string groupName = "SomeGroup";
 
+            service.SaveGroup(userName, groupName);
+            List<string> loadedGroups = service.LoadGroups(userName);
+
+            Assert.Contains(groupName, loadedGroups);
         }
+
         [Fact]
-        public void disconnectTest()
+        public async Task DisconnectTest()
         {
-            commandoTextbox.text = "QUIT";//Command to disconnect from server
+            await _connection.ConnectAsync("news.sunsite.dk", 119);
 
-            Assert.Equal("205", _responseData);//insert server response code for successful disconnection
-
+            string response = await _connection.SendCommandAsync("QUIT");
+            Assert.StartsWith("205", response);
         }
-
-
     }
 }

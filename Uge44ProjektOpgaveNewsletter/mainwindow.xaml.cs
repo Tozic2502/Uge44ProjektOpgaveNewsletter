@@ -1,36 +1,24 @@
-﻿using System.Diagnostics;
-using System.IO;
-using System.Net.Sockets;
-using System.Text;
-
+﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Uge44ProjektOpgaveNewsletter.Models;
 using Uge44ProjektOpgaveNewsletter.Service;
+using Uge44ProjektOpgaveNewsletter.Views;
 
 namespace Uge44ProjektOpgaveNewsletter
 {
     public partial class MainWindow : Window
     {
-        // Change these fields to nullable by adding '?'
-        private TcpClient? _client;
-        private NetworkStream? _stream;
-        private StreamReader? _reader;
-        private StreamWriter? _writer;
-        private string? _responseData;
-        private string userFilePath = "SavedUsers.txt"; // same file path you used earlier
-
-        // Add this property to reference your savedUsers model
-        private SaveUserService savedUsers = new SaveUserService();
-        
-
-
+        private readonly SaveUserService savedUsers = new SaveUserService();
+        private readonly string userFilePath = "SavedUsers.txt";
+        private readonly ConnectionService connection = ConnectionService.Instance;
 
         public MainWindow()
         {
             InitializeComponent();
         }
-        // Handle Connection button click to connect to server
+
         private async void ConnectionButton_Click(object sender, RoutedEventArgs e)
         {
             string host = serverNameTextbox.Text.Trim();
@@ -45,33 +33,18 @@ namespace Uge44ProjektOpgaveNewsletter
 
             try
             {
-                // Connect in a background thread
-                await Task.Run(() =>
-                {
-                    _client = new TcpClient();
-                    _client.ReceiveTimeout = 3000;
-                    _client.SendTimeout = 3000;
-                    _client.Connect(host, port);
-
-                    _stream = _client.GetStream();
-                    _reader = new StreamReader(_stream, Encoding.ASCII);
-                    _writer = new StreamWriter(_stream, Encoding.ASCII) { NewLine = "\r\n", AutoFlush = true };
-                    _responseData = _reader.ReadLine();
-                    
-                    
-                });
-                responseTextbox.Text += "Server response:\n" + _responseData + "\n";
-                responseTextbox.Text += $"Connected to {host}:{port}\n";
+                string response = await connection.ConnectAsync(host, port);
+                responseTextbox.Text += $"Server response:\n{response}\nConnected to {host}:{port}\n";
             }
             catch (Exception ex)
             {
                 responseTextbox.Text += $"Error connecting: {ex.Message}\n";
             }
         }
-        // Handle Confirm button click to send login info
+
         private async void ConfirmButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_client == null || !_client.Connected)
+            if (!connection.IsConnected)
             {
                 MessageBox.Show("You must connect to the server first!");
                 return;
@@ -86,51 +59,38 @@ namespace Uge44ProjektOpgaveNewsletter
                 return;
             }
 
-            string User = $"AuthInfo user {username} ";
-            string Pass = $"AuthInfo pass {password} ";
             responseTextbox.Text += "Sending login info...\n";
 
             try
             {
-                string user = await Task.Run(() => SendLogin(User));
-                responseTextbox.Text += "Server response:\n" + _responseData + "\n";
-                if (!_responseData.StartsWith("381"))
+                string userResp = await connection.SendCommandAsync($"AuthInfo user {username}");
+                responseTextbox.Text += $"Server: {userResp}\n";
+
+                if (!userResp.StartsWith("381"))
                 {
                     responseTextbox.Text += "Username not accepted by server.\n";
                     return;
                 }
+
+                string passResp = await connection.SendCommandAsync($"AuthInfo pass {password}");
+                responseTextbox.Text += $"Server: {passResp}\n";
+
+                if (passResp.StartsWith("281"))
+                {
+                    responseTextbox.Text += "Login successful!\n";
+                    OpenCommandWindow();
+                }
                 else
                 {
-                    string pass = await Task.Run(() => SendLogin(Pass));
-                    responseTextbox.Text += "Server response:\n" + _responseData + "\n";
+                    responseTextbox.Text += "Login failed. Check your credentials.\n";
                 }
-
             }
             catch (Exception ex)
             {
                 responseTextbox.Text += "Error sending login: " + ex.Message + "\n";
             }
-           if (_responseData.StartsWith("281"))
-            {
-                responseTextbox.Text += "Login successful!\n";
-                PassVariable();
-            }
-            else
-            {
-                responseTextbox.Text += "Login failed. Check your credentials.\n";
-            }
         }
-        // Method to send login information to the server
-        private string SendLogin(string message)
-        {
-            if (_writer == null || _reader == null)
-                throw new InvalidOperationException("Not connected to server.");
 
-            _writer.WriteLine(message);
-
-            return _responseData = _reader.ReadLine();
-        }
-        // Save login credentials to file
         private void saveLoginButton_Click(object sender, RoutedEventArgs e)
         {
             string username = userNameTextbox.Text.Trim();
@@ -144,16 +104,14 @@ namespace Uge44ProjektOpgaveNewsletter
                 return;
             }
 
-            savedUsers.SaveUser(username, password,serverName,port, userFilePath);
-
+            savedUsers.SaveUser(username, password, serverName, port, userFilePath);
             MessageBox.Show("Login saved successfully.");
 
-            // Refresh ComboBox after saving
             savedUsers.LoadUsers(userFilePath);
             savedUserCB.ItemsSource = savedUsers.GetUsernames();
             savedUserCB.SelectedItem = username;
         }
-        // Handle selection change in ComboBox to populate username and password
+
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (savedUserCB.SelectedItem is string selectedUsername)
@@ -161,27 +119,23 @@ namespace Uge44ProjektOpgaveNewsletter
                 userNameTextbox.Text = selectedUsername;
                 passwordBox.Password = savedUsers.GetPassword(selectedUsername);
                 serverNameTextbox.Text = savedUsers.GetServerName(selectedUsername);
-                portTextbox.Text = savedUsers.GetPort(selectedUsername).ToString();
+                portTextbox.Text = savedUsers.GetPort(selectedUsername);
             }
         }
 
-        // Ensure ComboBox is initialized with usernames on window load
         protected override void OnContentRendered(EventArgs e)
         {
             base.OnContentRendered(e);
             savedUsers.LoadUsers(userFilePath);
             savedUserCB.ItemsSource = savedUsers.GetUsernames();
         }
-        //passes connection reader and writer to next window
-        private void PassVariable()
+
+        private void OpenCommandWindow()
         {
             var commandWindow = new Views.CommandWindow();
-            commandWindow.SetConnection(_reader, _writer, _client, _responseData, serverNameTextbox.Text);
+            commandWindow.SetServerAndUser(serverNameTextbox.Text, userNameTextbox.Text);
             commandWindow.Show();
             this.Close();
-
         }
-
-        
     }
 }
