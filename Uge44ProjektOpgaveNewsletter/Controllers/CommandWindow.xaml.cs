@@ -246,15 +246,43 @@ namespace Uge44ProjektOpgaveNewsletter.Views
 
             MessageBox.Show($"Group '{groupName}' saved for user {_User}.");
         }
-
-
-
         // --- Saved group selection ---
         private void savedGroupsLV_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (savedGroupsLV.SelectedItem is not null)
             {
                 commandotTextbox.Text = "GROUP " + savedGroupsLV.SelectedItem.ToString();
+            }
+        }
+        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(_responseData))
+            {
+                MessageBox.Show("No response data to search. Please execute a command first.");
+                return;
+            }
+            string searchTerm = SearchTextbox.Text.Trim();
+            if (string.IsNullOrEmpty(searchTerm))
+            {
+                MessageBox.Show("Please enter a search term.");
+                return;
+            }
+            StringBuilder searchResults = new StringBuilder();
+            string[] lines = _responseData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            foreach (var line in lines)
+            {
+                if (line.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    searchResults.AppendLine(line);
+                }
+            }
+            if (searchResults.Length == 0)
+            {
+                InfoTextBlock.Text = "No matches found.";
+            }
+            else
+            {
+                InfoTextBlock.Text = $"Search results for '{searchTerm}':\n{searchResults}";
             }
         }
     }

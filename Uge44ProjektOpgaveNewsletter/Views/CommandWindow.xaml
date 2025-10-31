@@ -5,37 +5,66 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Uge44ProjektOpgaveNewsletter.Views"
         mc:Ignorable="d"
-        Title="Window1" Height="450" Width="1200" MinWidth="800" MinHeight="400">
+        Title="Command Window"
+        Height="450" Width="1200"
+        MinWidth="800" MinHeight="400">
 
     <Grid Margin="10">
-        <!-- Define columns: 
-             1. Left = saved groups
-             2. Middle = info/log area
-             3. Right = last used commands -->
+        <!-- Columns: Left = saved groups, Center = log/info, Right = last used commands -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="5*"/>
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Define rows:
-             1. Header area (server + buttons)
-             2. Main content area (lists + text)
-             3. Command input -->
+        <!-- Rows: Header, Main content, Command input -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- SERVER LABEL + BUTTONS -->
-        <StackPanel Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,0,0,5">
-            <Label x:Name="serverNameLable" Content="ServerName" VerticalAlignment="Center" />
-            <Button x:Name="SaveGroupButton" Content="Save Group" Width="100" Margin="10,0,0,0"
-                    Click="SaveGroupButton_Click"/>
-        </StackPanel>
+        <!-- ======= HEADER (server + buttons + search) ======= -->
+        <Grid Grid.ColumnSpan="3" Margin="0,0,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <!-- Label -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Save button -->
+                <ColumnDefinition Width="*"/>
+                <!-- Search box (flexible) -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Search button -->
+            </Grid.ColumnDefinitions>
 
-        <!-- LEFT: Saved Groups -->
+            <Label x:Name="serverNameLable" 
+                   Content="ServerName" 
+                   VerticalAlignment="Center"
+                   Margin="0,0,10,0"/>
+
+            <Button x:Name="SaveGroupButton" 
+                    Content="Save Group" 
+                    Grid.Column="1" 
+                    Margin="0,0,10,0"
+                    Padding="10,2"
+                    Click="SaveGroupButton_Click"/>
+
+            <TextBox x:Name="SearchTextbox" 
+                     Grid.Column="2"
+                     TextWrapping="Wrap" 
+                     Text=""
+                     VerticalAlignment="Center"
+                     Margin="0,0,10,0"/>
+
+            <Button x:Name="SearchButton" 
+                    Content="Search" 
+                    Grid.Column="3"
+                    Padding="10,2"
+                    Click="SearchButton_Click"
+                    VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- ======= LEFT: Saved Groups ======= -->
         <ListView x:Name="savedGroupsLV"
                   Grid.Row="1" Grid.Column="0"
                   Margin="0,0,5,0"
@@ -47,21 +76,20 @@
             </ListView.View>
         </ListView>
 
-        <!-- CENTER: Scrollable Info Text -->
+        <!-- ======= CENTER: Info Text ======= -->
         <TextBox x:Name="InfoTextBlock"
-         Grid.Row="1" Grid.Column="1"
-         TextWrapping="Wrap"
-         VerticalScrollBarVisibility="Auto"
-         HorizontalScrollBarVisibility="Disabled"
-         IsReadOnly="True"
-         AcceptsReturn="True"
-         FontSize="14"
-         Padding="5"
-         Margin="5,0,5,0"
-         Text="Text Here from Server"/>
+                 Grid.Row="1" Grid.Column="1"
+                 TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Disabled"
+                 IsReadOnly="True"
+                 AcceptsReturn="True"
+                 FontSize="14"
+                 Padding="5"
+                 Margin="5,0,5,0"
+                 Text="Text Here from Server"/>
 
-
-        <!-- RIGHT: Last Used Commands -->
+        <!-- ======= RIGHT: Last Used Commands ======= -->
         <ListView x:Name="lastUsedCommandLV"
                   Grid.Row="1" Grid.Column="2"
                   Margin="5,0,0,0"
@@ -73,23 +101,28 @@
             </ListView.View>
         </ListView>
 
-        <!-- BOTTOM: Command input -->
-        <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,5,0,0">
+        <!-- ======= BOTTOM: Command Input ======= -->
+        <Grid Grid.Row="2" Grid.ColumnSpan="3" Margin="0,5,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <!-- Command box expands -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Confirm button fixed -->
+            </Grid.ColumnDefinitions>
+
             <TextBox x:Name="commandotTextbox"
+                     Grid.Column="0"
                      TextWrapping="Wrap"
-                     Text="Commando box"
+                     Text=""
                      VerticalAlignment="Center"
                      Margin="0,0,5,0"
-                     Width="Auto"
-                     HorizontalAlignment="Stretch"
-                     MinWidth="400"
-                     Height="34"
-                     />
+                     Height="34"/>
+
             <Button x:Name="confirmCommandoButton"
+                    Grid.Column="1"
                     Content="Confirm"
                     Width="120"
                     Click="confirmCommandoButton_Click"/>
-        </StackPanel>
-
+        </Grid>
     </Grid>
 </Window>
